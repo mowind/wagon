@@ -11,9 +11,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/go-interpreter/wagon/exec"
-	"github.com/go-interpreter/wagon/validate"
-	"github.com/go-interpreter/wagon/wasm"
+	"github.com/PlatONnetwork/wagon/exec"
+	"github.com/PlatONnetwork/wagon/validate"
+	"github.com/PlatONnetwork/wagon/wasm"
 )
 
 func main() {

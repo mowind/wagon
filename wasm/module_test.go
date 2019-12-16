@@ -12,8 +12,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/go-interpreter/wagon/exec"
-	"github.com/go-interpreter/wagon/wasm"
+	"github.com/PlatONnetwork/wagon/exec"
+	"github.com/PlatONnetwork/wagon/wasm"
 )
 
 var testPaths = []string{
