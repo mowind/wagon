@@ -73,6 +73,8 @@ type VM struct {
 	abort bool // Flag for host functions to terminate execution
 
 	nativeBackend *nativeCompiler
+
+	hostCtx interface{}
 }
 
 // As per the WebAssembly spec: https://github.com/WebAssembly/design/blob/27ac254c854994103c24834a994be16f74f54186/Semantics.md#linear-memory
@@ -205,6 +207,14 @@ func (vm *VM) resetGlobals() error {
 // Memory returns the linear memory space for the VM.
 func (vm *VM) Memory() []byte {
 	return vm.memory
+}
+
+func (vm *VM) SetHostCtx(ctx interface{})  {
+	vm.hostCtx = ctx
+}
+
+func (vm *VM) HostCtx( ) interface{} {
+	return vm.hostCtx
 }
 
 func (vm *VM) pushBool(v bool) {
@@ -539,4 +549,8 @@ func (proc *Process) MemSize() int {
 // Terminate stops the execution of the current module.
 func (proc *Process) Terminate() {
 	proc.vm.abort = true
+}
+
+func (proc *Process) HostCtx() interface{} {
+	return proc.vm.HostCtx()
 }
