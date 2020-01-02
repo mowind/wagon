@@ -11,8 +11,8 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/go-interpreter/wagon/exec"
-	"github.com/go-interpreter/wagon/wasm"
+	"github.com/PlatONnetwork/wagon/exec"
+	"github.com/PlatONnetwork/wagon/wasm"
 )
 
 func ExampleVM_add() {
