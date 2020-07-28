@@ -1,8 +1,11 @@
 package exec
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"sync"
+
 	"github.com/PlatONnetwork/wagon/disasm"
 	"github.com/PlatONnetwork/wagon/exec/internal/compile"
 	"github.com/PlatONnetwork/wagon/wasm"
@@ -10,6 +13,7 @@ import (
 
 type CompileVM struct {
 	VM
+	MemoryLimitation uint64
 }
 
 type CompiledModule struct {
@@ -102,6 +106,10 @@ func CompileModule(module *wasm.Module) (*CompiledModule, error) {
 	return &compiled, nil
 }
 
+var memoryPool = sync.Pool{
+	New: func() interface{} { return new(bytes.Buffer) },
+}
+
 func NewVMWithCompiled(module *CompiledModule, memLimit uint64) (*CompileVM, error) {
 	var vm CompileVM
 
@@ -110,8 +118,13 @@ func NewVMWithCompiled(module *CompiledModule, memLimit uint64) (*CompileVM, err
 		return nil, fmt.Errorf("memory is exceed the limitation of %d", memLimit)
 	}
 	vm.MemoryLimitation = memLimit
-	vm.memory = make([]byte, memsize)
-	copy(vm.memory, module.memory)
+
+	membuf := memoryPool.Get().(*bytes.Buffer)
+	membuf.Reset()
+	membuf.Write(module.memory)
+	vm.memory = membuf.Bytes() //make([]byte, memsize)
+	vm.membuf = membuf
+	//copy(vm.memory, module.memory)
 
 	vm.funcs = module.funcs
 	vm.globals = make([]uint64, len(module.RawModule.GlobalIndexSpace))
@@ -121,4 +134,3 @@ func NewVMWithCompiled(module *CompiledModule, memLimit uint64) (*CompileVM, err
 
 	return &vm, nil
 }
-
