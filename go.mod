@@ -1,4 +1,4 @@
-module github.com/mowind/wagon
+module github.com/PlatONnetwork/wagon
 
 require (
 	github.com/edsrzf/mmap-go v1.0.0
