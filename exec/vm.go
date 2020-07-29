@@ -6,6 +6,7 @@
 package exec
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -61,6 +62,8 @@ type VM struct {
 	memory  []byte
 	funcs   []function
 
+	membuf *bytes.Buffer
+
 	funcTable [256]func()
 
 	// RecoverPanic controls whether the `ExecCode` method
@@ -76,9 +79,6 @@ type VM struct {
 	hostCtx interface{}
 
 	useGas func(byte)
-
-	//memory limitation
-	MemoryLimitation uint64
 }
 
 // As per the WebAssembly spec: https://github.com/WebAssembly/design/blob/27ac254c854994103c24834a994be16f74f54186/Semantics.md#linear-memory
@@ -493,6 +493,10 @@ func (vm *VM) Close() error {
 		if err := vm.nativeBackend.Close(); err != nil {
 			return err
 		}
+	}
+	if vm.membuf != nil {
+		memoryPool.Put(vm.membuf)
+		vm.membuf = nil
 	}
 	return nil
 }
