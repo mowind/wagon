@@ -13,7 +13,6 @@ import (
 
 type CompileVM struct {
 	VM
-	MemoryLimitation uint64
 }
 
 type CompiledModule struct {
