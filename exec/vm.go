@@ -6,6 +6,7 @@
 package exec
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -60,6 +61,8 @@ type VM struct {
 	globals []uint64
 	memory  []byte
 	funcs   []function
+
+	membuf *bytes.Buffer
 
 	funcTable [256]func()
 
@@ -489,6 +492,10 @@ func (vm *VM) Restart() {
 // Close frees any resources managed by the VM.
 func (vm *VM) Close() error {
 	vm.abort = true // prevents further use.
+	if vm.membuf != nil {
+		memoryPool.Put(vm.membuf)
+		vm.membuf = nil
+	}
 	if vm.nativeBackend != nil {
 		if err := vm.nativeBackend.Close(); err != nil {
 			return err

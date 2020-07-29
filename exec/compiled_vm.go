@@ -1,11 +1,13 @@
 package exec
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/PlatONnetwork/wagon/disasm"
 	"github.com/PlatONnetwork/wagon/exec/internal/compile"
 	"github.com/PlatONnetwork/wagon/wasm"
+	"sync"
 )
 
 type CompileVM struct {
@@ -102,6 +104,10 @@ func CompileModule(module *wasm.Module) (*CompiledModule, error) {
 	return &compiled, nil
 }
 
+var memoryPool = sync.Pool{
+	New: func() interface{} { return new(bytes.Buffer) },
+}
+
 func NewVMWithCompiled(module *CompiledModule, memLimit uint64) (*CompileVM, error) {
 	var vm CompileVM
 
@@ -110,8 +116,11 @@ func NewVMWithCompiled(module *CompiledModule, memLimit uint64) (*CompileVM, err
 		return nil, fmt.Errorf("memory is exceed the limitation of %d", memLimit)
 	}
 	vm.MemoryLimitation = memLimit
-	vm.memory = make([]byte, memsize)
-	copy(vm.memory, module.memory)
+	membuf := memoryPool.Get().(*bytes.Buffer)
+	membuf.Reset()
+	membuf.Write(module.memory)
+	vm.memory = membuf.Bytes()
+	vm.membuf = membuf
 
 	vm.funcs = module.funcs
 	vm.globals = make([]uint64, len(module.RawModule.GlobalIndexSpace))
@@ -121,4 +130,3 @@ func NewVMWithCompiled(module *CompiledModule, memLimit uint64) (*CompileVM, err
 
 	return &vm, nil
 }
-
